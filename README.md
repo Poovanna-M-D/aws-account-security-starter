@@ -12,7 +12,7 @@ A default AWS account has no permanent audit trail. If something goes wrong, nob
 
 ```mermaid
 flowchart LR
-    U["You<br/>Google sign-in + MFA"] --> R["Admin role<br/>temporary credentials"]
+    U["Me<br/>Google sign-in + MFA"] --> R["Admin role<br/>temporary credentials"]
     R --> A["AWS API calls"]
     A --> CT["CloudTrail<br/>multi-region trail"]
     CT --> EH["Event history<br/>free, last 90 days"]
@@ -46,7 +46,7 @@ Region used: `ap-southeast-2` (Sydney).
 | When | Timestamps in UTC, matching my local time |
 | From where | My own public IP address |
 | With what | Chrome on a Mac, so a human using the console |
-| MFA on the session | `false`, because the session started before I registered MFA |
+| MFA flag on the session | `false`. I tested sign-in separately and MFA was required, so this field does not show the MFA I used |
 
 I also compared this with an event AWS created by itself during sign-up (default network creation). That one shows an AWS service as the caller, no IP address, and `eventType: AwsServiceEvent`.
 
@@ -64,7 +64,8 @@ Account IDs, emails and IP addresses are blurred.
 - Newer AWS accounts can use role-based access from the start, with no IAM users and no long-term keys.
 - `AdministratorAccess` allows everything. That is fine for learning but is the opposite of least privilege.
 - Event history is free but covers 90 days and one region at a time. A trail keeps logs permanently.
-- `mfaAuthenticated` describes the login session, not the resource. A session that began before MFA was added shows `false`.
+- I tested MFA instead of assuming it worked. Signing out of only the console session did not ask for a code, but signing out of AWS fully and signing in again did. MFA is enforced at a fresh Builder ID sign-in, and CloudTrail's `mfaAuthenticated` field did not reflect it.
+- On a shared or work machine, use the full "Sign out of AWS", not just the console sign-out.
 - Filtering Event history by `Read-only = false` quickly shows only the actions that changed something.
 
 ## Limitations and next steps
@@ -72,7 +73,8 @@ Account IDs, emails and IP addresses are blurred.
 - Single account, with no AWS Organizations or service control policies
 - Logs are stored but not yet analyzed or alerted on
 - No threat detection yet
-- Next: GuardDuty findings, automatic alerts, then automatic remediation with narrow least-privilege roles
+- Next: S3 security hardening, then automatic alerts and remediation with narrow least-privilege roles
+- GuardDuty is not available on my account type, so I studied it as a concept instead of using it
 
 ## Cleanup
 
